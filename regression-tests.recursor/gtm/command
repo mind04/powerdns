@@ -5,5 +5,5 @@
 ## perhaps we need root hints..
 
 cleandig xeas.gtm.xboxlive.example.net a | sed 's/\(.*\tIN\t[A-Z0-9]\+\t\)\([0-9]\+\)/\13600/'
-../pdns/rec_control --config-dir=configs/recursor-service wipe-cache ns.gtm.xboxlive.example.net xeas.gtm.xboxlive.example.net
+../pdns/rec_control --config-dir=configs/recursor-service/ wipe-cache ns.gtm.xboxlive.example.net xeas.gtm.xboxlive.example.net
 cleandig xeas.gtm.xboxlive.example.net a | sed 's/\(.*\tIN\t[A-Z0-9]\+\t\)\([0-9]\+\)/\13600/'

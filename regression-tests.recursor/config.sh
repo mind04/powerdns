@@ -183,21 +183,21 @@ gtm.xboxlive.example.net.        3600 IN NS  ns2.gtm.xboxlive.example.net.
 xeas.gtm.xboxlive.example.net.   3600 IN A   192.0.2.7
 EOF
 
-cat > $PREFIX.18/prequery.lua <<EOF
-function prequery ( dnspacket )
-    qname, qtype = dnspacket:getQuestion()
-    if qtype == pdns.A and qname == "xeas.gtm.xboxlive.example.net"
-    then
-        dnspacket:setRcode(pdns.NXDOMAIN)
-        ret = {}
-        ret[1] = {qname=qname, qtype=pdns.CNAME, content="www2.arthur.example.net", place=1}
-        ret[2] = {qname="", qtype=pdns.SOA, content="$SOA", place=2}
-        dnspacket:addRecords(ret)
-        return true
-    end
-    return false
-end
-EOF
+# cat > $PREFIX.18/prequery.lua <<EOF
+# function prequery ( dnspacket )
+#     qname, qtype = dnspacket:getQuestion()
+#     if qtype == pdns.A and qname == "xeas.gtm.xboxlive.example.net"
+#     then
+#         dnspacket:setRcode(pdns.NXDOMAIN)
+#         ret = {}
+#         ret[1] = {qname=qname, qtype=pdns.CNAME, content="www2.arthur.example.net", place=1}
+#         ret[2] = {qname="", qtype=pdns.SOA, content="$SOA", place=2}
+#         dnspacket:addRecords(ret)
+#         return true
+#     end
+#     return false
+# end
+# EOF
 
 for dir in $PREFIX.*
 do
