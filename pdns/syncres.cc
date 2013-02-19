@@ -1168,7 +1168,8 @@ void SyncRes::addCruft(const string &qname, vector<DNSResourceRecord>& ret)
         host=string(k->content.c_str() + fields[3].first, fields[3].second - fields[3].first);
       else 
         continue;
-      doResolve(host, s_doAAAAAdditionalProcessing ? QType(QType::ADDR) : QType(QType::A), addit, 1, beenthere);
+      // we used to do additional processing here.. no more
+      // doResolve(host, QType(QType::A), addit, 1, beenthere);
     }
   
   if(!addit.empty()) {
