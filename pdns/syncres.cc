@@ -17,6 +17,7 @@
 */
 
 #include <boost/algorithm/string.hpp>
+#include <boost/foreach.hpp>
 #include "utility.hh"
 #include "syncres.hh"
 #include <iostream>
