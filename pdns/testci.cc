@@ -12,6 +12,8 @@ int main(int argc, char **argv)
 	for(set<string, CIStringCompare>::const_iterator i=nsset.begin();i!=nsset.end();++i) {
 		cout<<"["<<*i<<"]"<<endl;
 	}
+	
+	cerr<<endl;
 
 	set<typedns_t, CIStringPairCompare> nsset2;  
 	nsset2.insert(make_pair("ns.example.com", 1));
