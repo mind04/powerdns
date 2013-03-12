@@ -403,6 +403,7 @@ struct CIStringCompare: public std::binary_function<string, string, bool>
       return true;
     if(pdns_ilexicographical_compare(b, a))
       return false;
+    return false;
   }
 };
 
