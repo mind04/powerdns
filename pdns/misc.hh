@@ -399,7 +399,10 @@ struct CIStringCompare: public std::binary_function<string, string, bool>
 {
   bool operator()(const string& a, const string& b) const
   {
-    return pdns_ilexicographical_compare(a, b);
+    if(pdns_ilexicographical_compare(a, b))
+      return true;
+    if(pdns_ilexicographical_compare(b, a))
+      return false;
   }
 };
 
