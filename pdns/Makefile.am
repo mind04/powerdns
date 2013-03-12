@@ -39,7 +39,7 @@ sbin_PROGRAMS = pdns_server
 bin_PROGRAMS = pdns_control pdnssec dnsreplay
 endif
 
-EXTRA_PROGRAMS=pdns_recursor sdig tsig-tests speedtest pdns_control dnsscope dnsgram \
+EXTRA_PROGRAMS=testci pdns_recursor sdig tsig-tests speedtest pdns_control dnsscope dnsgram \
 toysdig dnsdemog dnswasher dnsscan nproxy notify pdnssec dnsbulktest nsec3dig # dnslabel # tcptorture
 
 pdns_server_SOURCES=dnspacket.cc nameserver.cc tcpreceiver.hh \
@@ -126,6 +126,8 @@ endif
 if SQLITE3
 pdnssec_SOURCES += ssqlite3.cc ssqlite3.hh
 endif
+
+testci_SOURCES=testci.cc 
 
 sdig_SOURCES=sdig.cc sstuff.hh dnsparser.cc dnsparser.hh dnsrecords.cc dnswriter.cc dnslabeltext.cc dnswriter.hh \
 	misc.cc misc.hh rcpgenerator.cc rcpgenerator.hh base64.cc base64.hh unix_utility.cc \
