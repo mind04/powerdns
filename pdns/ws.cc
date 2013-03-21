@@ -43,7 +43,8 @@ StatWebServer::StatWebServer()
   d_min10=d_min5=d_min1=0;
   d_ws = 0;
   if(arg().mustDo("webserver"))
-    d_ws = new WebServer(arg()["webserver-address"], arg().asNum("webserver-port"),arg()["webserver-password"]);
+    // d_ws = new WebServer(arg()["webserver-address"], arg().asNum("webserver-port"),arg()["webserver-password"]);
+    d_ws = onion_new(O_THREADED);
 }
 
 void StatWebServer::go()
@@ -158,20 +159,21 @@ string StatWebServer::makePercentage(const double& val)
   return (boost::format("%.01f%%") % val).str();
 }
 
-string StatWebServer::indexfunction(const string& method, const string& post, const map<string,string> &varmap, void *ptr, bool *custom)
+// string StatWebServer::indexfunction(const string& method, const string& post, const map<string,string> &varmap, void *ptr, bool *custom)
+int StatWebServer::indexfunction(void *ptr, onion_request *req, onion_response *res)
 {
   StatWebServer *sws=static_cast<StatWebServer *>(ptr);
-  map<string,string>rvarmap=varmap;
-  if(!rvarmap["resetring"].empty()){
-    *custom=true;
-    S.resetRing(rvarmap["resetring"]);
-    return "HTTP/1.1 301 Moved Permanently\nLocation: /\nConnection: close\n\n";
-  }
-  if(!rvarmap["resizering"].empty()){
-    *custom=true;
-    S.resizeRing(rvarmap["resizering"], atoi(rvarmap["size"].c_str()));
-    return "HTTP/1.1 301 Moved Permanently\nLocation: /\nConnection: close\n\n";
-  }
+  // map<string,string>rvarmap=varmap;
+  // if(!rvarmap["resetring"].empty()){
+  //   *custom=true;
+  //   S.resetRing(rvarmap["resetring"]);
+  //   return "HTTP/1.1 301 Moved Permanently\nLocation: /\nConnection: close\n\n";
+  // }
+  // if(!rvarmap["resizering"].empty()){
+  //   *custom=true;
+  //   S.resizeRing(rvarmap["resizering"], atoi(rvarmap["size"].c_str()));
+  //   return "HTTP/1.1 301 Moved Permanently\nLocation: /\nConnection: close\n\n";
+  // }
 
   ostringstream ret;
 
@@ -181,9 +183,9 @@ string StatWebServer::indexfunction(const string& method, const string& post, co
   ret<<"<h2>";
   if(!arg()["config-name"].empty())
     ret<<"["<<arg()["config-name"]<<"]";
-  if(rvarmap["ring"].empty())
-    ret<<"PDNS "VERSION" Main Page</h2>"<<endl;
-  else
+  // if(rvarmap["ring"].empty())
+  //   ret<<"PDNS "VERSION" Main Page</h2>"<<endl;
+  // else
     ret<<"Details page</h2><a href=/>Back to main page</a><p>"<<endl;
 
   time_t passed=time(0)-s_starttime;
@@ -219,7 +221,7 @@ string StatWebServer::indexfunction(const string& method, const string& post, co
     "<br>"<<endl;
 
   ret<<"Total queries: "<<S.read("udp-queries")<<". Question/answer latency: "<<S.read("latency")/1000.0<<"ms<p>"<<endl;
-  if(rvarmap["ring"].empty()) {
+  // if(rvarmap["ring"].empty()) {
     vector<string>entries=S.listRings();
     for(vector<string>::const_iterator i=entries.begin();i!=entries.end();++i)
       printtable(ret,*i,S.getRingTitle(*i));
@@ -227,13 +229,14 @@ string StatWebServer::indexfunction(const string& method, const string& post, co
     sws->printvars(ret);
     if(arg().mustDo("webserver-print-arguments"))
       sws->printargs(ret);
-  }
-  else
-    printtable(ret,rvarmap["ring"],S.getRingTitle(rvarmap["ring"]),100);
+  // }
+  // else
+  //   printtable(ret,rvarmap["ring"],S.getRingTitle(rvarmap["ring"]),100);
 
   ret<<"</body></html>"<<endl;
 
-  return ret.str();
+  onion_response_write0(res, ret.str().c_str());
+  return OCS_PROCESSED;
 }
 
 
@@ -515,14 +518,30 @@ string StatWebServer::jsonstat(const string& method, const string& post, const m
   return ret;
 }
 
+int hello(void *p, onion_request *req, onion_response *res){
+  //onion_response_set_length(res, 11);
+  onion_response_write0(res,"Hello world");
+  if (onion_request_get_query(req, "1")){
+    onion_response_printf(res, "<p>Path: %s", onion_request_get_query(req, "1"));
+  }
+  onion_response_printf(res,"<p>Client description: %s",onion_request_get_client_description(req));
+  return OCS_PROCESSED;
+}
+
+
 void StatWebServer::launch()
 {
   try {
-    d_ws->setCaller(this);
-    d_ws->registerHandler("",&indexfunction);
-    if(::arg().mustDo("experimental-json-interface"))
-      d_ws->registerHandler("jsonstat", &jsonstat);
-    d_ws->go();
+    // d_ws->setCaller(this);
+    // d_ws->registerHandler("",&indexfunction);
+    // if(::arg().mustDo("experimental-json-interface"))
+    //   d_ws->registerHandler("jsonstat", &jsonstat);
+    // d_ws->go();
+    onion_url *urls=onion_root_url(d_ws);
+
+    onion_url_add_with_data(urls, "", (void *)indexfunction, this, NULL);
+    // onion_url_add(urls, "jsonstat", (void *)jsonstat);
+    onion_listen(d_ws);
   }
   catch(...) {
     L<<Logger::Error<<"StatWebserver thread caught an exception, dying"<<endl;

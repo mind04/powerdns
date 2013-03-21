@@ -35,6 +35,8 @@
 
 #include "misc.hh"
 #include "namespaces.hh"
+#include "onion/onion.h"
+#include "onion/url.h"
 
 class Ewma
 {
@@ -75,8 +77,6 @@ private:
   double d_10, d_5, d_1, d_max;
 };
 
-class WebServer;
-
 class StatWebServer
 {
 public:
@@ -86,7 +86,9 @@ public:
 private:
   static void *threadHelper(void *);
   static void *statThreadHelper(void *p);
-  static string indexfunction(const string& method, const string& post, const map<string,string> &varmap, void *ptr, bool *custom);
+  // static string indexfunction(const string& method, const string& post, const map<string,string> &varmap, void *ptr, bool *custom);
+  static int indexfunction(void *ptr, onion_request *req, onion_response *res);
+
   static string jsonstat(const string& method, const string& post, const map<string,string> &varmap, void *ptr, bool *custom);
   void printvars(ostringstream &ret);
   void printargs(ostringstream &ret);
@@ -98,7 +100,7 @@ private:
   double d_min10, d_min5, d_min1;
   Ewma d_queries, d_cachehits, d_cachemisses;
   Ewma d_qcachehits, d_qcachemisses;
-  WebServer *d_ws;
+  onion *d_ws;
 };
 
 #endif

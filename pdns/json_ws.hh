@@ -18,6 +18,7 @@
 #include <boost/utility.hpp> 
 #include "namespaces.hh"
 #include "mplexer.hh"
+#include "onion/onion.h"
 
 class JWebserver : public boost::noncopyable
 {
@@ -28,6 +29,7 @@ class JWebserver : public boost::noncopyable
   private:
     FDMultiplexer* d_fdm;
     int d_socket;
+    onion *o;
 };
 
 string returnJSONStats(const map<string, string>& items);
