@@ -37,6 +37,8 @@
 #include "namespaces.hh"
 #include "onion/onion.h"
 #include "onion/url.h"
+#include "onion/dict.h"
+#include "onion/request.h"
 
 class Ewma
 {

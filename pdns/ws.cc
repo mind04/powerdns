@@ -159,21 +159,36 @@ string StatWebServer::makePercentage(const double& val)
   return (boost::format("%.01f%%") % val).str();
 }
 
+static void _inserter(void *ptr, const char *key, const void *value, int flags)
+{
+  map<string,string> *dest = static_cast<map<string, string> *>(ptr);
+  (*dest)[string(key)]=string((char *)value);
+}
+
+static void fromOnionDict(map <string,string>* ret, const onion_dict *dict)
+{
+  onion_dict_preorder(dict, (void *)_inserter, (void *) ret);
+}
+
 // string StatWebServer::indexfunction(const string& method, const string& post, const map<string,string> &varmap, void *ptr, bool *custom)
 int StatWebServer::indexfunction(void *ptr, onion_request *req, onion_response *res)
 {
   StatWebServer *sws=static_cast<StatWebServer *>(ptr);
+  map<string,string>rvarmap;
+  fromOnionDict(&rvarmap, onion_request_get_query_dict(req));
   // map<string,string>rvarmap=varmap;
-  // if(!rvarmap["resetring"].empty()){
-  //   *custom=true;
-  //   S.resetRing(rvarmap["resetring"]);
-  //   return "HTTP/1.1 301 Moved Permanently\nLocation: /\nConnection: close\n\n";
-  // }
-  // if(!rvarmap["resizering"].empty()){
-  //   *custom=true;
-  //   S.resizeRing(rvarmap["resizering"], atoi(rvarmap["size"].c_str()));
-  //   return "HTTP/1.1 301 Moved Permanently\nLocation: /\nConnection: close\n\n";
-  // }
+  if(!rvarmap["resetring"].empty()){
+    // *custom=true;
+    S.resetRing(rvarmap["resetring"]);
+    onion_response_write0(res, "HTTP/1.1 301 Moved Permanently\nLocation: /\nConnection: close\n\n");
+    return OCS_PROCESSED;
+  }
+  if(!rvarmap["resizering"].empty()){
+    // *custom=true;
+    S.resizeRing(rvarmap["resizering"], atoi(rvarmap["size"].c_str()));
+    onion_response_write0(res, "HTTP/1.1 301 Moved Permanently\nLocation: /\nConnection: close\n\n");
+    return OCS_PROCESSED;
+  }
 
   ostringstream ret;
 
@@ -183,9 +198,9 @@ int StatWebServer::indexfunction(void *ptr, onion_request *req, onion_response *
   ret<<"<h2>";
   if(!arg()["config-name"].empty())
     ret<<"["<<arg()["config-name"]<<"]";
-  // if(rvarmap["ring"].empty())
-  //   ret<<"PDNS "VERSION" Main Page</h2>"<<endl;
-  // else
+  if(rvarmap["ring"].empty())
+    ret<<"PDNS "VERSION" Main Page</h2>"<<endl;
+  else
     ret<<"Details page</h2><a href=/>Back to main page</a><p>"<<endl;
 
   time_t passed=time(0)-s_starttime;
@@ -221,7 +236,7 @@ int StatWebServer::indexfunction(void *ptr, onion_request *req, onion_response *
     "<br>"<<endl;
 
   ret<<"Total queries: "<<S.read("udp-queries")<<". Question/answer latency: "<<S.read("latency")/1000.0<<"ms<p>"<<endl;
-  // if(rvarmap["ring"].empty()) {
+  if(rvarmap["ring"].empty()) {
     vector<string>entries=S.listRings();
     for(vector<string>::const_iterator i=entries.begin();i!=entries.end();++i)
       printtable(ret,*i,S.getRingTitle(*i));
@@ -229,9 +244,9 @@ int StatWebServer::indexfunction(void *ptr, onion_request *req, onion_response *
     sws->printvars(ret);
     if(arg().mustDo("webserver-print-arguments"))
       sws->printargs(ret);
-  // }
-  // else
-  //   printtable(ret,rvarmap["ring"],S.getRingTitle(rvarmap["ring"]),100);
+  }
+  else
+    printtable(ret,rvarmap["ring"],S.getRingTitle(rvarmap["ring"]),100);
 
   ret<<"</body></html>"<<endl;
 
