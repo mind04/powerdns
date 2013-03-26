@@ -156,6 +156,11 @@ public:
     return d_val*=factor;
   }
 
+  double peek(void)
+  {
+    return d_val;
+  }
+
   bool stale(time_t limit) const
   {
     return limit > d_lastget.tv_sec;
@@ -304,8 +309,7 @@ public:
     ComboAddress d_best;
   };
 
-  typedef pair<string, uint16_t> typedns_t;
-  typedef map<typedns_t, DecayingEwmaCollection, CIStringPairCompare> nsspeeds_t;  
+  typedef map<string, DecayingEwmaCollection, CIStringCompare> nsspeeds_t;  
 
   struct EDNSStatus
   {
@@ -376,7 +380,7 @@ private:
   string getBestNSNamesFromCache(const string &qname,set<string, CIStringCompare>& nsset, bool* flawedNSSet, int depth, set<GetBestNSAnswer>&beenthere);
   void addAuthorityRecords(const string& qname, vector<DNSResourceRecord>& ret, int depth);
 
-  inline vector<typedns_t> shuffleInSpeedOrder(set<string, CIStringCompare> &nameservers, const string &prefix);
+  inline vector<string> shuffleInSpeedOrder(set<string, CIStringCompare> &nameservers, const string &prefix);
   bool moreSpecificThan(const string& a, const string &b);
   vector<ComboAddress> getAddrs(const string &qname, int type, int depth, set<GetBestNSAnswer>& beenthere);
 
