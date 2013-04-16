@@ -142,6 +142,8 @@ void declareArguments()
   ::arg().set("default-ksk-size","Default KSK size (0 means default)")="0";
   ::arg().set("default-zsk-algorithms","Default ZSK algorithms")="rsasha256";
   ::arg().set("default-zsk-size","Default KSK size (0 means default)")="0";
+
+  ::arg().setSwitch("experimental-consistent-backends","Assume that all backends have identical data, tolerate individual backend failure")="no";
 }
 
 void declareStats(void)
