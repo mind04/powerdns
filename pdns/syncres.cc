@@ -606,8 +606,8 @@ bool SyncRes::doCNAMECacheCheck(const string &qname, const QType &qtype, vector<
     prefix.append(depth, ' ');
   }
 
-  if(depth>10) {
-    LOG(prefix<<qname<<": CNAME loop too deep, depth="<<depth<<endl);
+  if(depth>9) {
+    LOG(prefix<<qname<<": recursing (CNAME or other indirection) too deep, depth="<<depth<<endl);
     res=RCode::ServFail;
     return true;
   }
@@ -860,7 +860,7 @@ int SyncRes::doResolveAt(set<string, CIStringCompare> nameservers, string auth, 
           pierceDontQuery=true;
         }
         else {
-          remoteIPs=getAddrs(*tns, depth+1, beenthere);
+          remoteIPs=getAddrs(*tns, depth+2, beenthere);
           pierceDontQuery=false;
         }
 
@@ -1082,7 +1082,7 @@ int SyncRes::doResolveAt(set<string, CIStringCompare> nameservers, string auth, 
         }
         else if(!done && i->d_place==DNSResourceRecord::AUTHORITY && dottedEndsOn(qname,i->qname) && i->qtype.getCode()==QType::SOA && 
            lwr.d_rcode==RCode::NoError) {
-          LOG(prefix<<qname<<": got negative caching indication for '"<< (qname+"|"+i->qtype.getName()+"'") <<endl);
+          LOG(prefix<<qname<<": got negative caching indication for '"<< (qname+"|"+qtype.getName()+"'") <<endl);
           
           if(!newtarget.empty()) {
             LOG(prefix<<qname<<": Hang on! Got a redirect to '"<<newtarget<<"' already"<<endl);
@@ -1125,8 +1125,8 @@ int SyncRes::doResolveAt(set<string, CIStringCompare> nameservers, string auth, 
         LOG(prefix<<qname<<": status=NXDOMAIN, we are done "<<(negindic ? "(have negative SOA)" : "")<<endl);
         return RCode::NXDomain;
       }
-      if(nsset.empty() && !lwr.d_rcode && negindic) {
-        LOG(prefix<<qname<<": status=noerror, other types may exist, but we are done (have negative SOA)"<<endl);
+      if(nsset.empty() && !lwr.d_rcode && (negindic || lwr.d_aabit)) {
+        LOG(prefix<<qname<<": status=noerror, other types may exist, but we are done "<<(negindic ? "(have negative SOA) " : "")<<(lwr.d_aabit ? "(have aa bit) " : "")<<endl);
         return 0;
       }
       else if(realreferral) {

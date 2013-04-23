@@ -1,8 +1,7 @@
-INCLUDES=-I../.. 
 noinst_LTLIBRARIES = libbind2backend.la
-AM_CPPFLAGS=$(BOOST_CPPFLAGS) @THREADFLAGS@
+AM_CPPFLAGS=-I../.. $(BOOST_CPPFLAGS) @THREADFLAGS@
 
-BUILT_SOURCES=bind-dnssec.schema.sqlite3.sql.h
+BUILT_SOURCES=bind-dnssec.schema.sqlite3.sql.h bindparser.h
 
 bind-dnssec.schema.sqlite3.sql.h: ../../bind-dnssec.schema.sqlite3.sql
 	( echo 'static char sqlCreate[] __attribute__((unused))=' ; sed 's/$$/"/g' ../../bind-dnssec.schema.sqlite3.sql | sed 's/^/"/g'  ; echo ';' ) > $@
@@ -10,7 +9,7 @@ bind-dnssec.schema.sqlite3.sql.h: ../../bind-dnssec.schema.sqlite3.sql
 
 libbind2backend_la_SOURCES=bindbackend2.cc bindbackend2.hh bindparser.yy \
 bindlexer.l ../../zoneparser-tng.cc ../../misc.cc  \
-bindparser.hh ../../unix_utility.cc binddnssec.cc bind-dnssec.schema.sqlite3.sql.h
+bindparserclasses.hh ../../unix_utility.cc binddnssec.cc bind-dnssec.schema.sqlite3.sql.h
 
 libbind2backend_la_CXXFLAGS=$(AM_CXXFLAGS)
 libbind2backend_la_CFLAGS=$(AM_CFLAGS)
@@ -70,3 +69,5 @@ AM_YFLAGS = -d --verbose --debug
 dnslabeltext.cc: ../../dnslabeltext.rl
 	ragel ../../dnslabeltext.rl -o dnslabeltext.cc
 
+.hh.h:
+	cp $< $@
